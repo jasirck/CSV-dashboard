@@ -1,22 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Upload CSV</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV File Upload</title>
+    <link href="/static/css/style.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Upload Your CSV File</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <p class="{{ category }}">{{ message }}</p>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <div class="container mx-auto px-4 py-8 flex-grow">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-primary mb-4">CSV Data Uploader</h1>
+            <p class="text-gray-600">Transform your data into insights</p>
+        </header>
 
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".csv" required>
-        <button type="submit">Upload</button>
-    </form>
+        <main class="max-w-md mx-auto">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-4">
+                        {% for category, message in messages %}
+                            <div class="p-4 rounded-lg 
+                                {% if category == 'success' %}bg-green-100 text-green-800{% endif %}
+                                {% if category == 'error' %}bg-red-100 text-red-800{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <div class="bg-white shadow-md rounded-lg p-8">
+                <form action="/upload" method="post" enctype="multipart/form-data" class="space-y-4">
+                    <div>
+                        <input type="file" name="file" id="file-upload" accept=".csv" required 
+                               class="hidden" />
+                        <label for="file-upload" 
+                               class="block w-full btn btn-primary cursor-pointer text-center">
+                            Choose CSV File
+                        </label>
+                        <p id="file-name" class="text-center text-gray-600 mt-2">No file selected</p>
+                    </div>
+                    <button type="submit" class="w-full btn btn-primary">Upload File</button>
+                </form>
+            </div>
+
+            <div class="mt-6 bg-white shadow-md rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-primary mb-4">Upload Tips</h3>
+                <ul class="space-y-2 text-gray-600">
+                    <li>• Only .csv files are allowed</li>
+                    <li>• Maximum file size: 10MB</li>
+                    <li>• Ensure correct column headers</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <footer class="bg-gray-100 py-4 text-center">
+        <p class="text-gray-600">&copy; 2024 Data Insights Dashboard</p>
+    </footer>
+
+    <script>
+        document.getElementById('file-upload').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+            document.getElementById('file-name').textContent = fileName;
+        });
+    </script>
 </body>
 </html>

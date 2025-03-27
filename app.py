@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objs as go
 import os
 
 app = Flask(__name__)
@@ -33,24 +34,56 @@ def upload_file():
 @app.route('/dashboard/<filename>', methods=['GET', 'POST'])
 def dashboard(filename):
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    df = pd.read_csv(filepath)
+    
+    try:
+        # Attempt to read CSV file
+        df = pd.read_csv(filepath)
 
-    # Generate Summary and Data Preview
-    summary = df.describe().to_html(classes="table table-striped")
-    data_preview = df.head(20).to_html(classes="table table-hover")
+        # Detect numeric columns for visualization
+        numeric_columns = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
 
-    # Visualization with Plotly
-    columns = df.columns.tolist()
-    chart_html = None
+        # Generate Summary and Data Preview
+        summary = df.describe().to_html(classes="table table-striped")
+        data_preview = df.head(20).to_html(classes="table table-hover")
 
-    if request.method == 'POST':
-        x_axis = request.form.get('x_axis')
-        y_axis = request.form.get('y_axis')
-        if x_axis and y_axis:
-            fig = px.scatter(df, x=x_axis, y=y_axis, title=f'{x_axis} vs {y_axis}')
-            chart_html = fig.to_html(full_html=False)
+        # Visualization with Plotly
+        chart_html = None
+        chart_type = None
 
-    return render_template('dashboard.html', filename=filename, summary=summary, data_preview=data_preview, columns=columns, chart_html=chart_html)
+        if request.method == 'POST':
+            x_axis = request.form.get('x_axis')
+            y_axis = request.form.get('y_axis')
+            chart_type = request.form.get('chart_type', 'scatter')
+
+            if x_axis and y_axis:
+                # Create different chart types based on selection
+                if chart_type == 'scatter':
+                    fig = px.scatter(df, x=x_axis, y=y_axis, 
+                                     title=f'{x_axis} vs {y_axis} - Scatter Plot')
+                elif chart_type == 'line':
+                    fig = px.line(df, x=x_axis, y=y_axis, 
+                                  title=f'{x_axis} vs {y_axis} - Line Chart')
+                elif chart_type == 'bar':
+                    fig = px.bar(df, x=x_axis, y=y_axis, 
+                                 title=f'{x_axis} vs {y_axis} - Bar Chart')
+                else:
+                    fig = px.scatter(df, x=x_axis, y=y_axis)
+
+                # Convert to HTML
+                chart_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+
+        return render_template('dashboard.html', 
+                               filename=filename, 
+                               summary=summary, 
+                               data_preview=data_preview, 
+                               columns=numeric_columns, 
+                               chart_html=chart_html,
+                               chart_type=chart_type)
+
+    except Exception as e:
+        # Handle potential errors in file reading
+        flash(f'Error processing file: {str(e)}', 'danger')
+        return redirect(url_for('upload_file'))
 
 if __name__ == '__main__':
     app.run(debug=True)
