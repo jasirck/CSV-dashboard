@@ -1,12 +1,32 @@
 Date,Product,Category,Quantity,Price,Total Sales
-2024-01-01,Phone,Electronics,5,300,1500
-2024-01-02,Laptop,Electronics,3,900,2700
-2024-01-03,Shirt,Clothing,10,25,250
-2024-01-04,Jeans,Clothing,7,40,280
-2024-01-05,Headphones,Electronics,6,100,600
-2024-01-06,Shoes,Clothing,4,80,320
-2024-01-07,Tablet,Electronics,2,400,800
-2024-01-08,Jacket,Clothing,5,150,750
-2024-01-09,Monitor,Electronics,4,200,800
-2024-01-10,T-Shirt,Clothing,8,20,160
-
+2024-01-01,Phone,Electronics,5,350,1750
+2024-01-02,Laptop,Electronics,3,950,2850
+2024-01-03,Shirt,Clothing,12,30,360
+2024-01-04,Jeans,Clothing,8,45,360
+2024-01-05,Headphones,Electronics,7,120,840
+2024-01-06,Shoes,Clothing,5,90,450
+2024-01-07,Tablet,Electronics,3,420,1260
+2024-01-08,Jacket,Clothing,6,160,960
+2024-01-09,Monitor,Electronics,5,230,1150
+2024-01-10,T-Shirt,Clothing,10,25,250
+2024-01-11,Smartwatch,Electronics,4,180,720
+2024-01-12,Dress,Clothing,7,75,525
+2024-01-13,Sofa,Furniture,2,650,1300
+2024-01-14,Table,Furniture,3,320,960
+2024-01-15,Chair,Furniture,5,150,750
+2024-01-16,Bed,Furniture,1,1200,1200
+2024-01-17,Refrigerator,Appliances,2,850,1700
+2024-01-18,Washing Machine,Appliances,1,600,600
+2024-01-19,Microwave,Appliances,3,200,600
+2024-01-20,Blender,Appliances,4,80,320
+2024-01-21,Air Conditioner,Appliances,2,1100,2200
+2024-01-22,TV,Electronics,3,750,2250
+2024-01-23,Camera,Electronics,4,500,2000
+2024-01-24,Pants,Clothing,10,55,550
+2024-01-25,Sneakers,Clothing,6,95,570
+2024-01-26,Book,Stationery,20,15,300
+2024-01-27,Laptop Bag,Accessories,10,50,500
+2024-01-28,Keyboard,Electronics,8,70,560
+2024-01-29,Mouse,Electronics,10,30,300
+2024-01-30,Desk,Furniture,2,400,800
+2024-01-31,Tablet Case,Accessories,12,25,300

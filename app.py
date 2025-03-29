@@ -81,7 +81,6 @@ def dashboard(filename):
             try:
                 if x_axis and y_axis:
                     fig = px.bar(df, x=x_axis, y=y_axis)
-                    fig.show()
                 else:
                     raise ValueError('Please select valid X and Y axes.')
             except Exception as e:
@@ -89,7 +88,6 @@ def dashboard(filename):
                 flash(error_message, 'danger')
         if chart_html is None:
             fig = px.bar(df, x=date_columns[0], y=numeric_columns[0])
-            fig.show()
         chart_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
 
         return render_template('dashboard.html', 
