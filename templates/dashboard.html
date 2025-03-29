@@ -1,87 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Dashboard - {{ filename }}</title>
-    <link href="/static/css/style.css" rel="stylesheet">
-</head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
-    <div class="container mx-auto px-4 py-8 flex-grow">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-primary mb-4">Data Dashboard</h1>
-            <p class="text-gray-600">Insights for {{ filename }}</p>
-        </header>
+{% extends "base.html" %}
 
-        <main class="space-y-8">
-            <section>
-                <h2 class="text-2xl font-semibold text-primary mb-4">Data Preview</h2>
-                <div class="bg-white shadow-md rounded-lg overflow-x-auto">
-                    {{ data_preview | safe }}
-                </div>
-            </section>
+{% block title %}Dashboard - {{ filename }}{% endblock %}
 
-            <section>
-                <h2 class="text-2xl font-semibold text-primary mb-4">Summary Statistics</h2>
-                <div class="bg-white shadow-md rounded-lg overflow-x-auto">
-                    {{ summary | safe }}
-                </div>
-            </section>
+{% block content %}
+<header class="mb-6">
+    <h1 class="text-2xl font-bold text-blue-600 mb-1">Data Dashboard</h1>
+    <p class="text-gray-600">Analyzing: {{ filename }}</p>
+</header>
 
-            <section>
-                <h2 class="text-2xl font-semibold text-primary mb-4">Visualize Your Data</h2>
-                <div class="bg-white shadow-md rounded-lg p-6">
-                    <form method="post" class="space-y-4">
-                        <div class="grid grid-cols-3 gap-4">
-                            <div>
-                                <label class="block mb-2">Visualization Type</label>
-                                <select name="chart_type" class="form-input">
-                                    <option value="scatter">Scatter Plot</option>
-                                    <option value="line">Line Chart</option>
-                                    <option value="bar">Bar Chart</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block mb-2">X-Axis</label>
-                                <select name="x_axis" class="form-input">
-                                    {% for column in columns %}
-                                        <option value="{{ column }}">{{ column }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block mb-2">Y-Axis</label>
-                                <select name="y_axis" class="form-input">
-                                    {% for column in columns %}
-                                        <option value="{{ column }}">{{ column }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <button type="submit" class="w-full btn btn-primary">
-                            Create Visualization
-                        </button>
-                    </form>
-                </div>
-            </section>
-
-            {% if chart_html %}
-                <section>
-                    <h2 class="text-2xl font-semibold text-primary mb-4">Generated Chart: {{ chart_type }}</h2>
-                    <div class="bg-white shadow-md rounded-lg p-4">
-                        {{ chart_html | safe }}
-                    </div>
-                </section>
-            {% endif %}
-
-            <div class="text-center mt-6">
-                <a href="/upload" class="btn btn-primary">Upload Another File</a>
-            </div>
-        </main>
+<section class="mb-8">
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Data Preview</h2>
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+        {{ data_preview | safe }}
     </div>
+</section>
 
-    <footer class="bg-gray-100 py-4 text-center">
-        <p class="text-gray-600">&copy; 2024 Data Insights Dashboard</p>
-    </footer>
-</body>
-</html>
+<section class="mb-8">
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Summary Statistics</h2>
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+        {{ summary | safe }}
+    </div>
+</section>
+
+<section class="bg-white p-6 rounded-lg shadow mb-8">
+    <h2 class="text-xl font-semibold text-blue-600 mb-4">Create Visualization (Bar Chart)</h2>
+    <form method="post">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label for="x_axis" class="block text-sm font-medium text-gray-700 mb-1">X-Axis</label>
+                <select name="x_axis" id="x_axis" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    {% for column in numeric_columns + categorical_columns + date_columns %}
+                        <option value="{{ column }}">{{ column }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="y_axis" class="block text-sm font-medium text-gray-700 mb-1">Y-Axis</label>
+                <select name="y_axis" id="y_axis" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    {% for column in numeric_columns %}
+                        <option value="{{ column }}">{{ column }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+            Generate Bar Chart
+        </button>
+    </form>
+</section>
+
+{% if chart_html %}
+    <section class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-3">Generated Chart</h2>
+        <div class="bg-white p-4 rounded-lg shadow">
+            {{ chart_html | safe }}
+        </div>
+    </section>
+{% endif %}
+
+<div class="text-center">
+    <a href="/upload" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+        Upload Another File
+    </a>
+</div>
+
+<footer class="text-center text-gray-500 text-sm mt-12">
+    <p>&copy; 2024 CSV Explorer</p>
+</footer>
+{% endblock %}

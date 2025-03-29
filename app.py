@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objs as go
 import os
 
 app = Flask(__name__)
@@ -11,12 +10,39 @@ app.secret_key = 'secretkey'
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
-# Homepage
+def clean_data(df):
+    """Enhanced data cleaning function"""
+    def safe_to_numeric(x):
+        try:
+            return pd.to_numeric(x.astype(str).str.replace(',', '', regex=True))
+        except Exception:
+            return x
+
+    df = df.apply(safe_to_numeric)
+
+    date_cols = [col for col in df.columns if 'date' in col.lower()]
+    for col in date_cols:
+        try:
+            df[col] = pd.to_datetime(df[col])
+        except Exception:
+            pass
+
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].mean())
+
+    df = df.drop_duplicates()
+    return df
+
+def generate_summary(df):
+    numeric_summary = df.select_dtypes(include=['number']).describe().round(2)
+    non_numeric_summary = df.select_dtypes(exclude=['number']).describe().round(2)
+    summary = pd.concat([numeric_summary, non_numeric_summary], axis=1, sort=False)
+    return summary.to_html(classes="table-auto")
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Upload CSV Route
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -30,58 +56,52 @@ def upload_file():
             flash('Invalid file. Please upload a CSV file.', 'danger')
     return render_template('upload.html')
 
-# Dashboard Route
 @app.route('/dashboard/<filename>', methods=['GET', 'POST'])
 def dashboard(filename):
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     
     try:
-        # Attempt to read CSV file
         df = pd.read_csv(filepath)
-
-        # Detect numeric columns for visualization
-        numeric_columns = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
-
-        # Generate Summary and Data Preview
-        summary = df.describe().to_html(classes="table table-striped")
-        data_preview = df.head(20).to_html(classes="table table-hover")
-
-        # Visualization with Plotly
+        df = clean_data(df)
+        
+        numeric_columns = df.select_dtypes(include=['number']).columns.tolist()
+        categorical_columns = df.select_dtypes(include=['object', 'category']).columns.tolist()
+        date_columns = df.select_dtypes(include=['datetime']).columns.tolist()
+        
+        summary = generate_summary(df)
+        data_preview = df.head(20).to_html(classes="table-auto")
+        
         chart_html = None
-        chart_type = None
+        error_message = None
 
         if request.method == 'POST':
             x_axis = request.form.get('x_axis')
             y_axis = request.form.get('y_axis')
-            chart_type = request.form.get('chart_type', 'scatter')
-
-            if x_axis and y_axis:
-                # Create different chart types based on selection
-                if chart_type == 'scatter':
-                    fig = px.scatter(df, x=x_axis, y=y_axis, 
-                                     title=f'{x_axis} vs {y_axis} - Scatter Plot')
-                elif chart_type == 'line':
-                    fig = px.line(df, x=x_axis, y=y_axis, 
-                                  title=f'{x_axis} vs {y_axis} - Line Chart')
-                elif chart_type == 'bar':
-                    fig = px.bar(df, x=x_axis, y=y_axis, 
-                                 title=f'{x_axis} vs {y_axis} - Bar Chart')
+            
+            try:
+                if x_axis and y_axis:
+                    fig = px.bar(df, x=x_axis, y=y_axis)
+                    fig.show()
                 else:
-                    fig = px.scatter(df, x=x_axis, y=y_axis)
-
-                # Convert to HTML
-                chart_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+                    raise ValueError('Please select valid X and Y axes.')
+            except Exception as e:
+                error_message = f"Chart error: {str(e)}"
+                flash(error_message, 'danger')
+        if chart_html is None:
+            fig = px.bar(df, x=date_columns[0], y=numeric_columns[0])
+            fig.show()
+        chart_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
 
         return render_template('dashboard.html', 
                                filename=filename, 
                                summary=summary, 
                                data_preview=data_preview, 
-                               columns=numeric_columns, 
+                               numeric_columns=numeric_columns,
+                               categorical_columns=categorical_columns,
+                               date_columns=date_columns,
                                chart_html=chart_html,
-                               chart_type=chart_type)
-
+                               error_message=error_message)
     except Exception as e:
-        # Handle potential errors in file reading
         flash(f'Error processing file: {str(e)}', 'danger')
         return redirect(url_for('upload_file'))
 

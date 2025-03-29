@@ -1,68 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV File Upload</title>
-    <link href="/static/css/style.css" rel="stylesheet">
-</head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
-    <div class="container mx-auto px-4 py-8 flex-grow">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-primary mb-4">CSV Data Uploader</h1>
-            <p class="text-gray-600">Transform your data into insights</p>
-        </header>
+{% extends "base.html" %}
 
-        <main class="max-w-md mx-auto">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <div class="mb-4">
-                        {% for category, message in messages %}
-                            <div class="p-4 rounded-lg 
-                                {% if category == 'success' %}bg-green-100 text-green-800{% endif %}
-                                {% if category == 'error' %}bg-red-100 text-red-800{% endif %}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% endwith %}
+{% block title %}Upload CSV{% endblock %}
 
-            <div class="bg-white shadow-md rounded-lg p-8">
-                <form action="/upload" method="post" enctype="multipart/form-data" class="space-y-4">
-                    <div>
-                        <input type="file" name="file" id="file-upload" accept=".csv" required 
-                               class="hidden" />
-                        <label for="file-upload" 
-                               class="block w-full btn btn-primary cursor-pointer text-center">
-                            Choose CSV File
-                        </label>
-                        <p id="file-name" class="text-center text-gray-600 mt-2">No file selected</p>
-                    </div>
-                    <button type="submit" class="w-full btn btn-primary">Upload File</button>
-                </form>
+{% block content %}
+<header class="mb-6">
+    <h1 class="text-2xl font-bold text-blue-600 mb-1">Upload CSV File</h1>
+    <p class="text-gray-600">Get started by uploading your data</p>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="mb-6">
+            {% for category, message in messages %}
+                <div class="p-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="bg-white p-6 rounded-lg shadow mb-6">
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="file-upload">
+                Select CSV File
+            </label>
+            <div class="flex items-center">
+                <label class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    <input type="file" name="file" id="file-upload" accept=".csv" required class="hidden">
+                    Choose File
+                </label>
+                <span id="file-name" class="ml-4 text-gray-500">No file selected</span>
             </div>
+        </div>
+        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+            Upload and Analyze
+        </button>
+    </form>
+</div>
 
-            <div class="mt-6 bg-white shadow-md rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-primary mb-4">Upload Tips</h3>
-                <ul class="space-y-2 text-gray-600">
-                    <li>• Only .csv files are allowed</li>
-                    <li>• Maximum file size: 10MB</li>
-                    <li>• Ensure correct column headers</li>
-                </ul>
-            </div>
-        </main>
-    </div>
+<div class="bg-white p-6 rounded-lg shadow">
+    <h3 class="text-lg font-semibold text-blue-600 mb-3">Upload Guidelines</h3>
+    <ul class="list-disc pl-5 space-y-2 text-gray-600">
+        <li>Only CSV files are supported</li>
+        <li>Maximum file size: 10MB</li>
+        <li>First row should contain column headers</li>
+        <li>Ensure data is properly formatted</li>
+    </ul>
+</div>
 
-    <footer class="bg-gray-100 py-4 text-center">
-        <p class="text-gray-600">&copy; 2024 Data Insights Dashboard</p>
-    </footer>
+<footer class="text-center text-gray-500 text-sm mt-12">
+    <p>&copy; 2024 CSV Explorer</p>
+</footer>
 
-    <script>
-        document.getElementById('file-upload').addEventListener('change', function(e) {
-            const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
-            document.getElementById('file-name').textContent = fileName;
-        });
-    </script>
-</body>
-</html>
+<script>
+    document.getElementById('file-upload').addEventListener('change', function(e) {
+        const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+        document.getElementById('file-name').textContent = fileName;
+    });
+</script>
+{% endblock %}
